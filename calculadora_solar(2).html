@@ -1,0 +1,1732 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora Solar – Ecoenergy</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:ital,wght@0,300;0,400;0,500;0,600;1,300&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --orange: #5DC133;
+    --orange-light: #84D957;
+    --orange-dim: rgba(93,193,51,0.15);
+    --bg: #0C0C0C;
+    --surface: #141814;
+    --card: #1A201A;
+    --card-hover: #222922;
+    --border: rgba(93,193,51,0.25);
+    --border-subtle: rgba(255,255,255,0.07);
+    --text: #F0F0F0;
+    --text-muted: #888;
+    --text-dim: #555;
+    --green: #5DC133;
+    --green-dim: rgba(93,193,51,0.15);
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    font-weight: 400;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── BACKGROUND ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse 60% 40% at 80% 10%, rgba(255,136,0,0.06) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 30% at 5% 90%, rgba(255,136,0,0.04) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: relative;
+    padding: 32px 40px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border-subtle);
+    z-index: 1;
+  }
+
+  .logo-zone {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .sun-icon {
+    width: 48px; height: 48px;
+    position: relative;
+  }
+
+  .sun-core {
+    width: 22px; height: 22px;
+    background: var(--orange);
+    border-radius: 50%;
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 18px var(--orange), 0 0 40px rgba(255,136,0,0.4);
+    animation: pulse 2.5s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 18px var(--orange), 0 0 40px rgba(255,136,0,0.4); }
+    50% { box-shadow: 0 0 28px var(--orange), 0 0 60px rgba(255,136,0,0.6); }
+  }
+
+  .sun-ray {
+    width: 3px; height: 8px;
+    background: var(--orange);
+    position: absolute;
+    left: 50%; top: 50%;
+    border-radius: 2px;
+    transform-origin: center 24px;
+    opacity: 0.7;
+  }
+
+  .logo-text { line-height: 1; }
+  .logo-brand {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 26px;
+    letter-spacing: 2px;
+    color: var(--orange);
+    text-transform: uppercase;
+  }
+  .logo-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  .header-badge {
+    background: var(--orange-dim);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 11px;
+    color: var(--orange-light);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  /* ── LAYOUT ── */
+  .main {
+    position: relative;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+    z-index: 1;
+  }
+
+  .page-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 52px;
+    font-weight: 900;
+    line-height: 1;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .page-title span { color: var(--orange); }
+  .page-desc {
+    color: var(--text-muted);
+    font-size: 15px;
+    font-weight: 300;
+    margin-bottom: 44px;
+    letter-spacing: 0.3px;
+  }
+
+  /* ── GRID ── */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  /* ── SECTION ── */
+  .section {
+    background: var(--card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius);
+    padding: 28px;
+    margin-bottom: 16px;
+    transition: border-color 0.3s;
+  }
+  .section:hover { border-color: var(--border); }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .section-num {
+    width: 28px; height: 28px;
+    background: var(--orange);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    color: #000;
+    flex-shrink: 0;
+  }
+
+  .section-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--text);
+  }
+
+  /* ── BILL INPUTS ── */
+  .bill-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .bill-item {
+    background: var(--surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+  }
+
+  .bill-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+
+  .bill-sub { font-size: 10px; color: var(--text-dim); margin-bottom: 6px; }
+
+  input[type="number"] {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    padding: 8px 10px;
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+    margin-bottom: 6px;
+    -moz-appearance: textfield;
+  }
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+  input[type="number"]:focus { border-color: var(--orange); }
+
+  .input-unit {
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+  }
+
+  /* ── DOLAR ROW ── */
+  .dolar-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+  }
+  .dolar-row label {
+    font-size: 12px;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .dolar-row input { margin: 0; max-width: 130px; }
+  .dolar-note {
+    font-size: 11px;
+    color: var(--text-dim);
+    font-style: italic;
+  }
+
+  /* ── OPTION CARDS ── */
+  .option-group { margin-bottom: 20px; }
+  .option-group:last-child { margin-bottom: 0; }
+
+  .option-group-label {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+
+  .option-cards {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .opt-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex: 1;
+    min-width: 100px;
+    text-align: center;
+  }
+  .opt-card:hover {
+    border-color: var(--border);
+    background: var(--card-hover);
+  }
+  .opt-card.selected {
+    border-color: var(--orange);
+    background: var(--orange-dim);
+  }
+
+  .opt-card-value {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1;
+    margin-bottom: 3px;
+  }
+  .opt-card.selected .opt-card-value { color: var(--orange); }
+
+  .opt-card-label {
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .opt-card.selected .opt-card-label { color: var(--orange-light); }
+
+  .opt-card-price {
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-top: 4px;
+    font-family: 'Space Mono', monospace;
+  }
+  .opt-card.selected .opt-card-price { color: rgba(255,136,0,0.6); }
+
+  .opt-card.disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  /* ── SLIDER ── */
+  .slider-group { }
+  .slider-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    flex: 1;
+    height: 4px;
+    background: var(--border-subtle);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px; height: 20px;
+    background: var(--orange);
+    border-radius: 50%;
+    border: 3px solid #111;
+    box-shadow: 0 0 8px rgba(255,136,0,0.5);
+    transition: transform 0.1s;
+  }
+  input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.1); }
+
+  .slider-value {
+    font-family: 'Space Mono', monospace;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--orange);
+    min-width: 48px;
+    text-align: right;
+  }
+  .slider-unit {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 4px;
+    text-align: right;
+  }
+  .slider-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-top: 6px;
+    letter-spacing: 1px;
+  }
+
+  /* ── INCOMPATIBLE NOTE ── */
+  .compat-note {
+    display: none;
+    font-size: 11px;
+    color: #FF6B35;
+    background: rgba(255,107,53,0.1);
+    border: 1px solid rgba(255,107,53,0.2);
+    border-radius: 6px;
+    padding: 8px 12px;
+    margin-top: 8px;
+  }
+
+  /* ── RESULTS ── */
+  #results-section {
+    border-color: var(--border);
+    background: linear-gradient(135deg, #1A1A1A 0%, #1E1A14 100%);
+  }
+
+  .results-top {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .res-card {
+    background: var(--surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: 18px 16px;
+    text-align: center;
+  }
+
+  .res-card.highlight {
+    background: var(--orange-dim);
+    border-color: rgba(255,136,0,0.3);
+  }
+
+  .res-card.green {
+    background: var(--green-dim);
+    border-color: rgba(76,175,80,0.25);
+  }
+
+  .res-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+
+  .res-value {
+    font-family: 'Space Mono', monospace;
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 3px;
+  }
+  .res-card.highlight .res-value { color: var(--orange); }
+  .res-card.green .res-value { color: var(--green); }
+
+  .res-sub {
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+
+  /* ── COVERAGE BAR ── */
+  .coverage-section {
+    margin-bottom: 20px;
+  }
+
+  .cov-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 10px;
+  }
+
+  .cov-title {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+
+  .cov-pct {
+    font-family: 'Space Mono', monospace;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--orange);
+  }
+
+  .bar-track {
+    height: 12px;
+    background: var(--surface);
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid var(--border-subtle);
+  }
+
+  .bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--orange), var(--orange-light));
+    border-radius: 6px;
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+  }
+
+  .bar-fill::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 100%);
+    border-radius: inherit;
+  }
+
+  /* ── BREAKDOWN ── */
+  .breakdown-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .breakdown-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+  }
+
+  .bd-key {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  .bd-val {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    color: var(--text);
+    font-weight: 700;
+  }
+
+  /* ── PAYBACK TIMELINE ── */
+  .payback-section {
+    background: var(--surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: 18px;
+  }
+
+  .payback-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 14px;
+  }
+
+  .payback-title {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+
+  .payback-years {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--green);
+    line-height: 1;
+  }
+  .payback-years span {
+    font-size: 14px;
+    color: var(--text-muted);
+    font-weight: 400;
+    font-family: 'Barlow', sans-serif;
+  }
+
+  .timeline-track {
+    display: flex;
+    gap: 3px;
+    margin-top: 10px;
+  }
+
+  .timeline-bar {
+    flex: 1;
+    height: 28px;
+    background: var(--border-subtle);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8px;
+    color: var(--text-dim);
+    font-family: 'Space Mono', monospace;
+    transition: background 0.4s;
+    position: relative;
+  }
+
+  .timeline-bar.paid {
+    background: rgba(76,175,80,0.4);
+    color: var(--green);
+  }
+
+  .timeline-bar.payback-year {
+    background: var(--orange);
+    color: #000;
+    font-weight: 700;
+  }
+
+  /* ── SYSTEM COST BOX ── */
+  .cost-box {
+    background: var(--surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: 18px;
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .cost-left .cost-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .cost-usd {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 36px;
+    font-weight: 800;
+    color: var(--orange);
+    line-height: 1;
+  }
+
+  .cost-ars {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-family: 'Space Mono', monospace;
+    margin-top: 2px;
+  }
+
+  .cost-right {
+    text-align: right;
+  }
+  .cost-right .cost-label { margin-bottom: 4px; }
+  .cost-note {
+    font-size: 10px;
+    color: var(--text-dim);
+    font-style: italic;
+    max-width: 160px;
+    line-height: 1.4;
+  }
+
+  /* ── FOOTER ── */
+  .footer {
+    text-align: center;
+    padding: 24px;
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    border-top: 1px solid var(--border-subtle);
+    position: relative;
+    z-index: 1;
+  }
+  .footer a { color: var(--orange); text-decoration: none; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 680px) {
+    header { padding: 20px; }
+    .main { padding: 24px 16px 60px; }
+    .page-title { font-size: 36px; }
+    .bill-grid { grid-template-columns: 1fr 1fr; }
+    .results-top { grid-template-columns: 1fr 1fr; }
+    .results-top .res-card:last-child { grid-column: 1 / -1; }
+    .breakdown-grid { grid-template-columns: 1fr; }
+  }
+
+  /* ── ANIMATIONS ── */
+  .section { animation: fadeUp 0.5s ease both; }
+  .section:nth-child(2) { animation-delay: 0.1s; }
+  .section:nth-child(3) { animation-delay: 0.2s; }
+  .section:nth-child(4) { animation-delay: 0.3s; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .counter-animate {
+    transition: opacity 0.15s;
+  }
+  .counter-animate.updating { opacity: 0.3; }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 1000;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(6px);
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  .modal-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 40px 36px;
+    max-width: 420px; width: 100%;
+    box-shadow: 0 0 60px rgba(93,193,51,0.15);
+    animation: fadeUp 0.35s ease both;
+  }
+  .modal-sun {
+    text-align: center; font-size: 48px; margin-bottom: 16px; line-height:1;
+  }
+  .modal-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 32px; font-weight: 900; text-align: center;
+    text-transform: uppercase; color: var(--text);
+    margin-bottom: 6px; letter-spacing: 1px;
+  }
+  .modal-title span { color: var(--orange); }
+  .modal-sub {
+    text-align: center; color: var(--text-muted); font-size: 14px;
+    margin-bottom: 28px; line-height: 1.5;
+  }
+  .modal-field { margin-bottom: 16px; }
+  .modal-label {
+    font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--text-muted); font-weight: 600; margin-bottom: 6px; display: block;
+  }
+  .modal-input {
+    width: 100%; background: var(--surface);
+    border: 1.5px solid var(--border-subtle);
+    border-radius: 8px; padding: 12px 14px;
+    color: var(--text); font-family: 'Barlow', sans-serif;
+    font-size: 15px; outline: none; transition: border-color 0.2s;
+  }
+  .modal-input:focus { border-color: var(--orange); }
+  .modal-btn {
+    width: 100%; background: var(--orange); color: #000;
+    border: none; border-radius: 10px; padding: 14px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 20px; font-weight: 800; letter-spacing: 2px;
+    text-transform: uppercase; cursor: pointer;
+    margin-top: 8px; transition: all 0.2s;
+    box-shadow: 0 0 20px rgba(93,193,51,0.3);
+  }
+  .modal-btn:hover { filter: brightness(1.1); transform: scale(1.02); }
+  .modal-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .modal-error {
+    font-size: 12px; color: #FF6B35; margin-top: 8px;
+    text-align: center; display: none;
+  }
+  .modal-privacy {
+    font-size: 10px; color: var(--text-dim); text-align: center;
+    margin-top: 12px; line-height: 1.5;
+  }
+
+  /* ── ADMIN PANEL ── */
+  #adminPanel {
+    display: none; position: fixed; inset: 0; z-index: 2000;
+    background: #0A0A0A; overflow-y: auto; padding: 24px;
+  }
+  .admin-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 24px; padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .admin-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 28px; font-weight: 900; color: var(--orange);
+    text-transform: uppercase; letter-spacing: 2px;
+  }
+  .admin-close {
+    background: var(--surface); border: 1px solid var(--border-subtle);
+    color: var(--text-muted); border-radius: 8px; padding: 8px 16px;
+    cursor: pointer; font-size: 13px; font-family: 'Barlow', sans-serif;
+  }
+  .admin-stats {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 12px; margin-bottom: 24px;
+  }
+  .admin-stat {
+    background: var(--card); border: 1px solid var(--border-subtle);
+    border-radius: 10px; padding: 16px; text-align: center;
+  }
+  .admin-stat-val {
+    font-family: 'Space Mono', monospace; font-size: 32px;
+    font-weight: 700; color: var(--orange); line-height: 1;
+  }
+  .admin-stat-label {
+    font-size: 10px; color: var(--text-muted); letter-spacing: 2px;
+    text-transform: uppercase; margin-top: 4px;
+  }
+  .admin-table-wrap { overflow-x: auto; }
+  .admin-table {
+    width: 100%; border-collapse: collapse; font-size: 13px;
+  }
+  .admin-table th {
+    background: var(--surface); color: var(--text-muted);
+    padding: 10px 14px; text-align: left; font-size: 10px;
+    letter-spacing: 2px; text-transform: uppercase; font-weight: 600;
+    border-bottom: 1px solid var(--border-subtle); white-space: nowrap;
+  }
+  .admin-table td {
+    padding: 12px 14px; border-bottom: 1px solid var(--border-subtle);
+    color: var(--text); vertical-align: middle;
+  }
+  .admin-table tr:hover td { background: var(--card); }
+  .admin-table .wsp-btn {
+    background: #25D366; color: #000; border: none; border-radius: 6px;
+    padding: 6px 12px; font-size: 11px; font-weight: 700;
+    cursor: pointer; white-space: nowrap; text-decoration: none;
+    display: inline-block;
+  }
+  .admin-login {
+    max-width: 320px; margin: 120px auto; text-align: center;
+  }
+  .admin-search {
+    background: var(--surface); border: 1px solid var(--border-subtle);
+    border-radius: 8px; padding: 10px 14px; color: var(--text);
+    font-family: 'Barlow', sans-serif; font-size: 14px; outline: none;
+    width: 260px; margin-bottom: 20px;
+  }
+  .admin-search:focus { border-color: var(--orange); }
+
+</style>
+</head>
+<body>
+
+<!-- ── MODAL REGISTRO ── -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box">
+    <div class="modal-sun">☀️</div>
+    <div class="modal-title">Calculá tu <span>ahorro</span></div>
+    <p class="modal-sub">Ingresá tus datos para ver cuánto podés ahorrar con energía solar en tu hogar.</p>
+    <div class="modal-field">
+      <label class="modal-label">Tu nombre</label>
+      <input class="modal-input" id="leadNombre" type="text" placeholder="Ej: Juan García" autocomplete="name">
+    </div>
+    <div class="modal-field">
+      <label class="modal-label">Celular / WhatsApp</label>
+      <input class="modal-input" id="leadCelular" type="tel" placeholder="Ej: 3415001234" autocomplete="tel">
+    </div>
+    <div id="modalError" class="modal-error">Completá nombre y celular para continuar.</div>
+    <button class="modal-btn" id="modalBtn" onclick="submitLead()">Ver mi ahorro →</button>
+    <p class="modal-privacy">🔒 Tus datos son confidenciales. Solo Ecoenergy los usa para contactarte si lo necesitás.</p>
+  </div>
+</div>
+
+<!-- ── ADMIN PANEL ── -->
+<div id="adminPanel">
+  <div id="adminLogin" class="admin-login">
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;color:var(--orange);margin-bottom:20px;">⚙ Panel Admin</div>
+    <input class="modal-input" id="adminPass" type="password" placeholder="Contraseña" style="margin-bottom:12px;text-align:center;">
+    <button class="modal-btn" onclick="checkAdminPass()" style="font-size:16px;">Ingresar</button>
+    <button class="admin-close" onclick="closeAdmin()" style="margin-top:12px;display:block;width:100%;">← Volver a la calculadora</button>
+  </div>
+  <div id="adminContent" style="display:none;">
+    <div class="admin-header">
+      <div class="admin-title">☀ Ecoenergy — Leads</div>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <input class="admin-search" id="adminSearch" type="text" placeholder="Buscar nombre o celular..." oninput="filterLeads()">
+        <button class="admin-close" onclick="loadLeads()">↻ Actualizar</button>
+        <button class="admin-close" onclick="closeAdmin()">← Salir</button>
+      </div>
+    </div>
+    <div class="admin-stats">
+      <div class="admin-stat">
+        <div class="admin-stat-val" id="statTotal">—</div>
+        <div class="admin-stat-label">Total leads</div>
+      </div>
+      <div class="admin-stat">
+        <div class="admin-stat-val" id="statHoy">—</div>
+        <div class="admin-stat-label">Hoy</div>
+      </div>
+      <div class="admin-stat">
+        <div class="admin-stat-val" id="statSemana">—</div>
+        <div class="admin-stat-label">Esta semana</div>
+      </div>
+    </div>
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Nombre</th>
+            <th>Celular</th>
+            <th>Sistema</th>
+            <th>Paneles</th>
+            <th>Batería</th>
+            <th>kWh/bim</th>
+            <th>Ahorro/mes</th>
+            <th>Amort.</th>
+            <th>Contactar</th>
+          </tr>
+        </thead>
+        <tbody id="leadsTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ── BOTÓN ADMIN (oculto, acceso por URL ?admin) ── -->
+<div id="adminTrigger" style="display:none;position:fixed;bottom:16px;right:16px;z-index:900;">
+  <button onclick="openAdmin()" style="background:var(--surface);border:1px solid var(--border);color:var(--text-muted);border-radius:8px;padding:8px 14px;cursor:pointer;font-size:12px;">⚙ Admin</button>
+</div>
+
+<!-- ── HEADER ── -->
+<header>
+  <div class="logo-zone">
+    <img src="data:image/png;base64,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" alt="Ecoenergy" style="height:60px;width:auto;">
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <a href="https://www.instagram.com/ecoenergy.arg/" target="_blank" style="display:flex;align-items:center;gap:7px;background:rgba(93,193,51,0.1);border:1px solid rgba(93,193,51,0.25);border-radius:20px;padding:7px 14px;text-decoration:none;transition:all 0.2s;" onmouseover="this.style.background='rgba(93,193,51,0.2)'" onmouseout="this.style.background='rgba(93,193,51,0.1)'">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="2" y="2" width="20" height="20" rx="5" stroke="#5DC133" stroke-width="1.8"/>
+        <circle cx="12" cy="12" r="4.5" stroke="#5DC133" stroke-width="1.8"/>
+        <circle cx="17.5" cy="6.5" r="1" fill="#5DC133"/>
+      </svg>
+      <span style="font-size:12px;color:#5DC133;font-weight:600;letter-spacing:1px;">@ecoenergy.arg</span>
+    </a>
+    <div class="header-badge">Calculadora de Ahorro</div>
+  </div>
+</header>
+
+<!-- ── MAIN ── -->
+<main class="main">
+  <h1 class="page-title">¿Cuánto podés<br><span>ahorrar</span> con solar?</h1>
+  <p class="page-desc">Ingresá tus consumos, elegí el equipo y calculá tu amortización estimada.</p>
+
+  <!-- STEP 1: CONSUMO -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">01</div>
+      <div class="section-title">Tu Consumo Eléctrico</div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:14px;">
+
+      <div class="bill-item">
+        <div class="bill-label">Consumo del bimestre</div>
+        <div class="bill-sub">kWh que figura en tu factura</div>
+        <input type="number" id="monthlyKwh" placeholder="Ej: 527" min="0" max="9999" step="1">
+        <span class="input-unit">kWh / bimestre</span>
+      </div>
+
+      <div class="bill-item">
+        <div class="bill-label">Total de la factura</div>
+        <div class="bill-sub">Importe total que pagás</div>
+        <input type="number" id="monthlyArs" placeholder="Ej: 123933" min="0" max="9999999" step="100">
+        <span class="input-unit">ARS / bimestre</span>
+      </div>
+
+      <div class="bill-item">
+        <div class="bill-label">Cotización USD (BNA)</div>
+        <div class="bill-sub">Valor actual del dólar BNA</div>
+        <input type="number" id="dolarRate" value="1385" min="100" max="99999" step="1">
+        <span class="input-unit">ARS por USD</span>
+        <div class="dolar-live-label" style="font-size:10px;margin-top:5px;color:var(--text-dim);font-style:italic;">Consultando dolarapi.com...</div>
+      </div>
+
+    </div>
+
+    <div id="tarifaPreview" style="display:none; background:var(--surface); border:1px solid var(--border-subtle); border-radius:8px; padding:10px 14px; font-size:12px; color:var(--text-muted); margin-bottom:12px;">
+      Tarifa efectiva: <span id="tarifaVal" style="color:var(--orange-light); font-family:'Space Mono',monospace; font-weight:700;"></span> ARS/kWh (incluye impuestos, CAP y tasas)
+    </div>
+  </div>
+
+  <!-- STEP 2: EQUIPO -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">02</div>
+      <div class="section-title">Configuración del Sistema</div>
+    </div>
+
+    <!-- INVERTER -->
+    <div class="option-group">
+      <div class="option-group-label">Inversor / Cargador</div>
+      <div class="option-cards" id="inverterCards">
+        <div class="opt-card selected" data-group="inverter" data-value="3kw">
+          <div class="opt-card-value">3 kW</div>
+          <div class="opt-card-label">2400 W nominal</div>
+          <div class="opt-card-price">≈ USD 960</div>
+        </div>
+        <div class="opt-card" data-group="inverter" data-value="6.2kw">
+          <div class="opt-card-value">6.2 kW</div>
+          <div class="opt-card-label">Onda pura 48V</div>
+          <div class="opt-card-price">≈ USD 1,080</div>
+        </div>
+        <div class="opt-card" data-group="inverter" data-value="8.2kw">
+          <div class="opt-card-value">8.2 kW</div>
+          <div class="opt-card-label">Onda pura 48V</div>
+          <div class="opt-card-price">≈ USD 1,600</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANELS -->
+    <div class="option-group">
+      <div class="option-group-label">Paneles Monocristalinos 450W</div>
+      <div class="option-cards" id="panelCards">
+        <div class="opt-card selected" data-group="panels" data-value="4">
+          <div class="opt-card-value">4</div>
+          <div class="opt-card-label">Unidades · 1.8 kWp</div>
+          <div class="opt-card-price">≈ USD 1,080</div>
+        </div>
+        <div class="opt-card" data-group="panels" data-value="8">
+          <div class="opt-card-value">8</div>
+          <div class="opt-card-label">Unidades · 3.6 kWp</div>
+          <div class="opt-card-price">≈ USD 2,160</div>
+        </div>
+        <div class="opt-card" data-group="panels" data-value="14">
+          <div class="opt-card-value">14</div>
+          <div class="opt-card-label">Unidades · 6.3 kWp</div>
+          <div class="opt-card-price">≈ USD 3,780</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BATTERY -->
+    <div class="option-group">
+      <div class="option-group-label">Batería / Respaldo</div>
+      <div class="option-cards" id="batteryCards">
+        <div class="opt-card selected" data-group="battery" data-value="gel">
+          <div class="opt-card-value">Gel</div>
+          <div class="opt-card-label">100 Ah · Plomo-gel</div>
+          <div class="opt-card-price" id="gelPrice">≈ USD 610</div>
+        </div>
+        <div class="opt-card" data-group="battery" data-value="litio">
+          <div class="opt-card-value">Litio</div>
+          <div class="opt-card-label">100 Ah · Blunery 51.2V</div>
+          <div class="opt-card-price">≈ USD 1,700</div>
+        </div>
+        <div class="opt-card" data-group="battery" data-value="sinbat" id="sinbatCard">
+          <div class="opt-card-value">Sin</div>
+          <div class="opt-card-label">Solo generación diurna</div>
+          <div class="opt-card-price" style="color:var(--green)">+ USD 0</div>
+        </div>
+      </div>
+      <div class="compat-note" id="compatNote">
+        ⚠️ Esta opción solo está disponible para inversores de 6.2kW y 8.2kW (sistema 48V). El inversor 3kW requiere batería.
+      </div>
+    </div>
+
+    <!-- HOURS AT HOME -->
+    <div class="option-group">
+      <div class="option-group-label">Horas en casa durante el día</div>
+      <div class="slider-row">
+        <input type="range" id="hoursSlider" min="1" max="12" value="8" step="1">
+        <div>
+          <div class="slider-value" id="hoursValue">8</div>
+          <div class="slider-unit">hrs / día</div>
+        </div>
+      </div>
+      <div class="slider-labels">
+        <span>1 hr (solo noche)</span>
+        <span>6 hrs</span>
+        <span>12 hrs (todo el día)</span>
+      </div>
+    </div>
+
+    <!-- TARIFF ESCALATION -->
+    <div class="option-group">
+      <div class="option-group-label">Incremento tarifario anual estimado
+        <span style="font-size:10px; color:var(--text-dim); font-weight:400; margin-left:6px;">(EPE Santa Fe histórico: 35–50% anual)</span>
+      </div>
+      <div class="slider-row">
+        <input type="range" id="escalacionSlider" min="10" max="80" value="35" step="5">
+        <div>
+          <div class="slider-value" id="escalacionValue">35</div>
+          <div class="slider-unit">% / año</div>
+        </div>
+      </div>
+      <div class="slider-labels">
+        <span>10% (conservador)</span>
+        <span>40%</span>
+        <span>80% (acelerado)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CALC BUTTON -->
+  <div style="text-align:center; margin-bottom:16px;">
+    <button id="calcBtn" onclick="updateResults()" style="
+      background: var(--orange);
+      color: #000;
+      border: none;
+      border-radius: 10px;
+      padding: 16px 48px;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      cursor: pointer;
+      box-shadow: 0 0 24px rgba(255,136,0,0.4);
+      transition: all 0.2s;
+    " onmouseover="this.style.background='#FFB347';this.style.transform='scale(1.04)'"
+       onmouseout="this.style.background='var(--orange)';this.style.transform='scale(1)'">
+      ⚡ Calcular Ahorro
+    </button>
+  </div>
+
+  <!-- STEP 3: RESULTS -->
+  <div class="section" id="results-section">
+    <div class="section-header">
+      <div class="section-num">03</div>
+      <div class="section-title">Tu Estimación de Ahorro</div>
+    </div>
+
+    <!-- TOP METRICS -->
+    <div class="results-top">
+      <div class="res-card highlight">
+        <div class="res-label">Generación mensual</div>
+        <div class="res-value counter-animate" id="r-gen">—</div>
+        <div class="res-sub">kWh / mes</div>
+      </div>
+      <div class="res-card">
+        <div class="res-label">Tu consumo promedio</div>
+        <div class="res-value counter-animate" id="r-cons">—</div>
+        <div class="res-sub">kWh / mes</div>
+      </div>
+      <div class="res-card green">
+        <div class="res-label">Ahorro mensual</div>
+        <div class="res-value counter-animate" id="r-save-ars">—</div>
+        <div class="res-sub" id="r-save-usd">USD —</div>
+      </div>
+    </div>
+
+    <!-- COVERAGE BAR -->
+    <div class="coverage-section">
+      <div class="cov-header">
+        <div class="cov-title">Cobertura estimada del sistema</div>
+        <div class="cov-pct counter-animate" id="r-coverage">—%</div>
+      </div>
+      <div class="bar-track">
+        <div class="bar-fill" id="coverageBar" style="width: 0%"></div>
+      </div>
+    </div>
+
+    <!-- COST BOX -->
+    <div class="cost-box">
+      <div class="cost-left">
+        <div class="cost-label">Inversión del sistema</div>
+        <div class="cost-usd counter-animate" id="r-cost-usd">USD —</div>
+        <div class="cost-ars counter-animate" id="r-cost-ars">ARS —</div>
+      </div>
+      <div class="cost-right">
+        <div class="cost-label">Composición</div>
+        <div class="cost-note" id="r-cost-detail">—</div>
+      </div>
+    </div>
+
+    <!-- BREAKDOWN -->
+    <div class="breakdown-grid">
+      <div class="breakdown-item">
+        <span class="bd-key">Ahorro anual estimado</span>
+        <span class="bd-val counter-animate" id="r-save-year">—</span>
+      </div>
+      <div class="breakdown-item">
+        <span class="bd-key">Generación diaria prom.</span>
+        <span class="bd-val counter-animate" id="r-gen-day">—</span>
+      </div>
+      <div class="breakdown-item">
+        <span class="bd-key">Costo por kWh evitado</span>
+        <span class="bd-val counter-animate" id="r-cost-kwh">—</span>
+      </div>
+      <div class="breakdown-item">
+        <span class="bd-key">Capacidad batería util</span>
+        <span class="bd-val counter-animate" id="r-battery-cap">—</span>
+      </div>
+    </div>
+
+    <!-- PAYBACK TIMELINE -->
+    <div class="payback-section">
+      <div class="payback-header">
+        <div>
+          <div class="payback-title">Período de amortización</div>
+          <div style="font-size:10px; color:var(--text-dim); margin-top:3px;" id="payback-note">con incremento tarifario anual</div>
+        </div>
+        <div class="payback-years"><span id="r-payback">—</span> <span>años</span></div>
+      </div>
+      <div class="timeline-track" id="timelineTrack"></div>
+    </div>
+
+    <!-- PROYECCIÓN TARIFARIA -->
+    <div style="background:var(--surface);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);padding:18px;margin-top:12px;">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;flex-wrap:wrap;gap:6px;">
+        <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);font-weight:600;">Proyección de ahorros anuales</div>
+        <div style="font-size:10px;color:var(--orange);font-family:'Space Mono',monospace;font-weight:700;" id="r-escalacion-label">+40% anual</div>
+      </div>
+      <div id="proyeccionTable" style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;"></div>
+      <div style="font-size:10px;color:var(--text-dim);margin-top:10px;font-style:italic;">
+        * Cada año la tarifa sube → el ahorro crece. La inversión en USD protege contra devaluación del peso.
+      </div>
+    </div>
+
+  </div>
+
+</main>
+
+<footer class="footer">
+  Estimaciones orientativas basadas en presupuestos Ecoenergy · Dólar BNA · HSP promedio región Rosario/Santa Fe: 4.85 h/día
+  <br>Consultas: <a href="tel:+543415858527">341 585-8527</a> · Martín Cánaves
+</footer>
+
+<script>
+// ── STATE ──
+const state = {
+  inverter: '3kw',
+  panels: 4,
+  battery: 'gel',
+  hours: 8,
+  dolar: 1385,
+  escalacion: 40
+};
+
+// ── PRICING ── (calibrado contra presupuesto Ecoenergy)
+// Verificación: 6.2kw + 4p + 4gel = 1080+1080+1220+600 = USD 3,980 ✓
+// Verificación: 6.2kw + 8p + litio = 1080+2160+1700+600 = USD 5,540 ✓
+// Verificación: 3kw  + 3p + 2gel  =  960+ 810+ 610+600 = USD 2,980 ✓
+const PRICING = {
+  inverter: { '3kw': 960, '6.2kw': 1080, '8.2kw': 1600 },
+  panelUnit: 270,
+  gelUnit: 305,
+  litio: 1700,
+  install: 600,
+  gelCount: { '3kw': 2, '6.2kw': 4, '8.2kw': 4 }
+};
+
+const HSP = 4.85;
+const PANEL_W = 450;
+
+function calcCost() {
+  const inv = PRICING.inverter[state.inverter];
+  const panels = state.panels * PRICING.panelUnit;
+  let bat;
+  if (state.battery === 'sinbat') {
+    bat = 0;
+  } else if (state.battery === 'litio') {
+    bat = (state.inverter === '3kw') ? PRICING.gelCount['3kw'] * PRICING.gelUnit : PRICING.litio;
+  } else {
+    bat = PRICING.gelCount[state.inverter] * PRICING.gelUnit;
+  }
+  return inv + panels + bat + PRICING.install;
+}
+
+function getBatteryDetails() {
+  if (state.battery === 'sinbat') return { label: 'Sin batería (solo generación diurna)', usable: 0 };
+  if (state.battery === 'litio' && state.inverter !== '3kw') {
+    return { label: '1× Litio Blunery 51.2V-100Ah', usable: 4.8 };
+  }
+  const n = PRICING.gelCount[state.inverter];
+  const voltage = state.inverter === '3kw' ? 24 : 48;
+  // Baterías en serie → capacidad total = voltage × 100Ah (no multiplica por n)
+  const totalKwh = voltage * 100 / 1000; // 2.4 kWh para 24V, 4.8 kWh para 48V
+  const usable = Math.round(totalKwh * 0.70 * 10) / 10; // 70% DoD gel
+  return { label: `${n}× Gel 100Ah en serie (${voltage}V)`, usable };
+}
+
+function getBillStats() {
+  const k = parseFloat(document.getElementById('monthlyKwh').value);
+  const a = parseFloat(document.getElementById('monthlyArs').value);
+  if (isNaN(k) || k <= 0) return null;
+  const preview = document.getElementById('tarifaPreview');
+  if (a > 0) {
+    preview.style.display = 'block';
+    document.getElementById('tarifaVal').textContent = Math.round(a / k).toLocaleString('es-AR');
+  } else {
+    preview.style.display = 'none';
+  }
+  return {
+    monthlyKwh: k / 2,
+    monthlyArs: a > 0 ? a / 2 : null,
+    ratePerKwh: (a > 0 && k > 0) ? (a / k) : null
+  };
+}
+
+function calcPaybackYears(annualSaveYear1Ars, sysCostArs, escalacionPct) {
+  // Amortización con ahorro creciente por incremento tarifario anual
+  const r = escalacionPct / 100;
+  let cumulative = 0;
+  for (let y = 1; y <= 25; y++) {
+    const yearSave = annualSaveYear1Ars * Math.pow(1 + r, y - 1);
+    const prevCum = cumulative;
+    cumulative += yearSave;
+    if (cumulative >= sysCostArs) {
+      const fraction = (sysCostArs - prevCum) / yearSave;
+      return Math.round(((y - 1) + fraction) * 10) / 10;
+    }
+  }
+  return null;
+}
+
+function calcSavings() {
+  const bills = getBillStats();
+  if (!bills) return null;
+
+  const { monthlyKwh, monthlyArs, ratePerKwh } = bills;
+
+  // Generación mensual
+  const dailyGen = state.panels * PANEL_W * HSP; // Wh/día
+  const monthlyGen = dailyGen * 30 / 1000;       // kWh/mes
+
+  // Cobertura directa diurna (más horas en casa = más solar directo)
+  const directEff = 0.55 + (state.hours / 12) * 0.30; // 0.55 → 0.85
+
+  // Aporte nocturno de batería (~26 ciclos/mes)
+  const bat = getBatteryDetails();
+  const batMonthly = bat.usable * 26; // kWh/mes reales aportados por batería
+
+  const totalUsable = monthlyGen * directEff + batMonthly;
+  const coverage = Math.min(1, totalUsable / monthlyKwh);
+
+  const monthlySaveArs = bills.monthlyArs ? bills.monthlyArs * coverage : null;
+  const monthlySaveUsd = monthlySaveArs ? monthlySaveArs / state.dolar : null;
+  const annualSaveArs  = monthlySaveArs ? monthlySaveArs * 12 : null;
+
+  const sysUsd = calcCost();
+  const sysArs = sysUsd * state.dolar;
+
+  // Payback con incremento tarifario anual
+  const escalacion = state.escalacion || 35;
+  const payback = annualSaveArs ? calcPaybackYears(annualSaveArs, sysArs, escalacion) : null;
+
+  // Generar tabla de ahorro acumulado por año (para timeline)
+  const cumulativeByYear = [];
+  if (annualSaveArs) {
+    let cum = 0;
+    for (let y = 1; y <= 15; y++) {
+      cum += annualSaveArs * Math.pow(1 + escalacion/100, y - 1);
+      cumulativeByYear.push(Math.round(cum / state.dolar));
+    }
+  }
+
+  return {
+    monthlyGen: Math.round(monthlyGen),
+    monthlyKwh: Math.round(monthlyKwh),
+    dailyGen: Math.round(dailyGen / 1000 * 10) / 10,
+    coverage: Math.round(coverage * 100),
+    monthlySaveArs: monthlySaveArs ? Math.round(monthlySaveArs) : null,
+    monthlySaveUsd: monthlySaveUsd ? Math.round(monthlySaveUsd) : null,
+    annualSaveArs: annualSaveArs ? Math.round(annualSaveArs) : null,
+    sysUsd, sysArs: Math.round(sysArs),
+    payback,
+    costPerKwh: ratePerKwh ? Math.round(ratePerKwh) : null,
+    bat, cumulativeByYear,
+    escalacion
+  };
+}
+
+function fmtArs(n) {
+  return 'ARS ' + n.toLocaleString('es-AR');
+}
+function fmtUsd(n) {
+  return 'USD ' + n.toLocaleString('es-AR');
+}
+
+function buildTimeline(payback, cumulativeByYear, sysUsd) {
+  const track = document.getElementById('timelineTrack');
+  if (!payback || !cumulativeByYear) { track.innerHTML = ''; return; }
+  const paybackFloor = Math.floor(payback);
+  let html = '';
+  for (let y = 1; y <= 15; y++) {
+    const cumUsd = cumulativeByYear[y - 1] || 0;
+    const pct = Math.min(100, Math.round(cumUsd / sysUsd * 100));
+    let cls = '';
+    if (y <= paybackFloor) cls = 'paid';
+    else if (y === paybackFloor + 1) cls = 'payback-year';
+    html += `<div class="timeline-bar ${cls}" title="Año ${y}: USD ${cumUsd.toLocaleString('es-AR')} acumulado (${pct}%)">${y}</div>`;
+  }
+  track.innerHTML = html;
+}
+
+function updateResults() {
+  const r = calcSavings();
+  const animate = (id, val) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.add('updating');
+    setTimeout(() => { el.textContent = val; el.classList.remove('updating'); }, 120);
+  };
+
+  if (!r) {
+    ['r-gen','r-cons','r-save-ars','r-coverage','r-cost-usd','r-cost-ars',
+     'r-save-year','r-gen-day','r-cost-kwh','r-battery-cap','r-payback','r-save-usd']
+      .forEach(id => { const el = document.getElementById(id); if(el) el.textContent = '—'; });
+    document.getElementById('coverageBar').style.width = '0%';
+    document.getElementById('timelineTrack').innerHTML = '';
+    return;
+  }
+
+  animate('r-gen', r.monthlyGen);
+  animate('r-cons', r.monthlyKwh);
+  animate('r-coverage', r.coverage + '%');
+  animate('r-save-ars', r.monthlySaveArs ? fmtArs(r.monthlySaveArs) : '—');
+  document.getElementById('r-save-usd').textContent = r.monthlySaveUsd ? fmtUsd(r.monthlySaveUsd) : '—';
+  animate('r-cost-usd', fmtUsd(r.sysUsd));
+  animate('r-cost-ars', fmtArs(r.sysArs));
+  animate('r-save-year', r.annualSaveArs ? fmtArs(r.annualSaveArs) : '—');
+  animate('r-gen-day', r.dailyGen + ' kWh/día');
+  animate('r-cost-kwh', r.costPerKwh ? 'ARS ' + r.costPerKwh + '/kWh' : '—');
+  animate('r-battery-cap', r.bat.usable + ' kWh util');
+  animate('r-payback', r.payback ? r.payback : '—');
+  const note = document.getElementById('payback-note');
+  if (note && r.escalacion) note.textContent = `con ${r.escalacion}% de aumento tarifario anual`;
+
+  // Cost detail
+  const n = PRICING.gelCount[state.inverter];
+  const batLabel = state.battery === 'sinbat'
+    ? 'Sin batería'
+    : (state.battery === 'litio' && state.inverter !== '3kw')
+      ? '1× Litio Blunery 51.2V'
+      : `${n}× Gel 100Ah`;
+  document.getElementById('r-cost-detail').innerHTML =
+    `Inversor ${state.inverter} + ${state.panels} paneles 450W<br>${batLabel}<br>+ estructura e instalación`;
+
+  // Coverage bar
+  setTimeout(() => {
+    document.getElementById('coverageBar').style.width = r.coverage + '%';
+  }, 50);
+
+  buildTimeline(r.payback, r.cumulativeByYear, r.sysUsd);
+
+  // Guardar datos del cálculo en Supabase (debounced)
+  clearTimeout(window._leadUpdateTimer);
+  window._leadUpdateTimer = setTimeout(() => updateLead(r), 2000);
+
+  // Proyección table
+  const el = document.getElementById('r-escalacion-label');
+  if (el) el.textContent = '+' + r.escalacion + '% anual';
+  const table = document.getElementById('proyeccionTable');
+  if (table && r.annualSaveArs) {
+    let html = '';
+    for (let y = 1; y <= 10; y++) {
+      const yearSave = Math.round(r.annualSaveArs * Math.pow(1 + r.escalacion/100, y - 1));
+      const isPaid = r.payback && y <= Math.floor(r.payback);
+      const isPaybackYear = r.payback && y === Math.floor(r.payback) + 1;
+      const bg = isPaybackYear ? 'var(--orange)' : isPaid ? 'rgba(93,193,51,0.15)' : 'var(--bg)';
+      const textColor = isPaybackYear ? '#000' : isPaid ? 'var(--green)' : 'var(--text-muted)';
+      html += `<div style="background:${bg};border:1px solid var(--border-subtle);border-radius:6px;padding:10px 8px;text-align:center;">
+        <div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:${textColor};margin-bottom:4px;opacity:0.8;">AÑO ${y}</div>
+        <div style="font-family:'Space Mono',monospace;font-size:11px;font-weight:700;color:${textColor};">${(yearSave/1000).toFixed(0)}K</div>
+        <div style="font-size:8px;color:${textColor};opacity:0.7;margin-top:2px;">ARS</div>
+      </div>`;
+    }
+    table.innerHTML = html;
+  } else if (table) {
+    table.innerHTML = '';
+  }
+}
+
+// ── OPTION CARDS LOGIC ──
+document.querySelectorAll('.opt-card').forEach(card => {
+  card.addEventListener('click', function() {
+    if (this.classList.contains('disabled')) return;
+    const group = this.dataset.group;
+    document.querySelectorAll(`[data-group="${group}"]`).forEach(c => c.classList.remove('selected'));
+    this.classList.add('selected');
+
+    if (group === 'inverter') state.inverter = this.dataset.value;
+    if (group === 'panels') state.panels = parseInt(this.dataset.value);
+    if (group === 'battery') state.battery = this.dataset.value;
+
+    // Disable sin batería for 3kw; if 3kw selected while sinbat active → switch to gel
+    const sinbatCard = document.getElementById('sinbatCard');
+    if (state.inverter === '3kw') {
+      sinbatCard.classList.add('disabled');
+      if (state.battery === 'sinbat') {
+        state.battery = 'gel';
+        document.querySelectorAll('[data-group="battery"]').forEach(c => c.classList.remove('selected'));
+        document.querySelector('[data-group="battery"][data-value="gel"]').classList.add('selected');
+      }
+    } else {
+      sinbatCard.classList.remove('disabled');
+    }
+
+    // Compat note for litio + 3kw or sinbateria + 3kw
+    const compatNote = document.getElementById('compatNote');
+    const showNote = (state.battery === 'litio' && state.inverter === '3kw') ||
+                     (state.battery === 'sinbat' && state.inverter === '3kw');
+    compatNote.style.display = showNote ? 'block' : 'none';
+
+    // Update gel battery price display
+    const n = PRICING.gelCount[state.inverter];
+    document.getElementById('gelPrice').textContent = `≈ USD ${(n * PRICING.gelUnit).toLocaleString('es-AR')}`;
+
+    updateResults();
+  });
+});
+
+// ── SLIDER HORAS ──
+document.getElementById('hoursSlider').addEventListener('input', function() {
+  state.hours = parseInt(this.value);
+  document.getElementById('hoursValue').textContent = this.value;
+  updateResults();
+});
+
+// ── BILL INPUTS ──
+document.querySelectorAll('input[type="number"]').forEach(inp => {
+  inp.addEventListener('input', () => {
+    if (inp.id === 'dolarRate') state.dolar = parseFloat(inp.value) || 1200;
+    updateResults();
+  });
+});
+
+// ── SUPABASE CONFIG ──
+const SB_URL  = 'https://zjohehnjkfwebqlhvqna.supabase.co';
+const SB_KEY  = 'sb_publishable_2yCjAeTXoKAuDE45UsBZDw_iyjXxfob';
+const ADMIN_PASSWORD = 'ecoenergy2025';
+
+let currentLeadId = null;
+let allLeads = [];
+
+// ── MODAL ──
+async function submitLead() {
+  const nombre  = document.getElementById('leadNombre').value.trim();
+  const celular = document.getElementById('leadCelular').value.trim();
+  const errEl   = document.getElementById('modalError');
+  const btn     = document.getElementById('modalBtn');
+
+  if (!nombre || !celular) {
+    errEl.style.display = 'block';
+    return;
+  }
+  errEl.style.display = 'none';
+  btn.disabled = true;
+  btn.textContent = 'Guardando...';
+
+  try {
+    const res = await fetch(`${SB_URL}/rest/v1/leads`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SB_KEY,
+        'Authorization': `Bearer ${SB_KEY}`,
+        'Prefer': 'return=representation'
+      },
+      body: JSON.stringify({ nombre, celular })
+    });
+
+    if (!res.ok) throw new Error('Error al guardar');
+    const data = await res.json();
+    currentLeadId = data[0]?.id;
+
+    // Ocultar modal
+    document.getElementById('modalOverlay').style.display = 'none';
+
+  } catch(e) {
+    // Si falla Supabase igual dejamos pasar (no bloquear al usuario)
+    console.warn('Lead save error:', e);
+    document.getElementById('modalOverlay').style.display = 'none';
+  }
+}
+
+// Enter key en modal
+document.addEventListener('DOMContentLoaded', () => {
+  ['leadNombre','leadCelular'].forEach(id => {
+    document.getElementById(id)?.addEventListener('keydown', e => {
+      if (e.key === 'Enter') submitLead();
+    });
+  });
+  // Mostrar botón admin si URL tiene ?admin
+  if (window.location.search.includes('admin') || window.location.hash === '#admin') {
+    document.getElementById('adminTrigger').style.display = 'block';
+  }
+});
+
+// Actualizar lead con datos del cálculo
+async function updateLead(calcData) {
+  if (!currentLeadId) return;
+  try {
+    await fetch(`${SB_URL}/rest/v1/leads?id=eq.${currentLeadId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SB_KEY,
+        'Authorization': `Bearer ${SB_KEY}`
+      },
+      body: JSON.stringify({
+        sistema: state.inverter,
+        paneles: String(state.panels),
+        bateria: state.battery,
+        kwh_bimestral: calcData.monthlyKwh ? calcData.monthlyKwh * 2 : null,
+        ahorro_mensual_ars: calcData.monthlySaveArs,
+        amortizacion_anos: calcData.payback
+      })
+    });
+  } catch(e) { console.warn('Lead update error:', e); }
+}
+
+// ── ADMIN ──
+function openAdmin() {
+  document.getElementById('adminPanel').style.display = 'block';
+}
+function closeAdmin() {
+  document.getElementById('adminPanel').style.display = 'none';
+}
+function checkAdminPass() {
+  const pass = document.getElementById('adminPass').value;
+  if (pass === ADMIN_PASSWORD) {
+    document.getElementById('adminLogin').style.display = 'none';
+    document.getElementById('adminContent').style.display = 'block';
+    loadLeads();
+  } else {
+    document.getElementById('adminPass').style.borderColor = '#FF6B35';
+    setTimeout(() => document.getElementById('adminPass').style.borderColor = '', 1000);
+  }
+}
+
+async function loadLeads() {
+  document.getElementById('leadsTableBody').innerHTML =
+    '<tr><td colspan="10" style="text-align:center;color:var(--text-muted);padding:24px;">Cargando...</td></tr>';
+  try {
+    const res = await fetch(
+      `${SB_URL}/rest/v1/leads?order=created_at.desc&limit=500`,
+      { headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` } }
+    );
+    allLeads = await res.json();
+    renderLeads(allLeads);
+  } catch(e) {
+    document.getElementById('leadsTableBody').innerHTML =
+      '<tr><td colspan="10" style="text-align:center;color:#FF6B35;padding:24px;">Error al cargar. Verificá los permisos de la tabla en Supabase.</td></tr>';
+  }
+}
+
+function filterLeads() {
+  const q = document.getElementById('adminSearch').value.toLowerCase();
+  const filtered = q
+    ? allLeads.filter(l => l.nombre?.toLowerCase().includes(q) || l.celular?.includes(q))
+    : allLeads;
+  renderLeads(filtered);
+}
+
+function renderLeads(leads) {
+  const now = new Date();
+  const hoy = leads.filter(l => {
+    const d = new Date(l.created_at);
+    return d.toDateString() === now.toDateString();
+  }).length;
+  const semana = leads.filter(l => {
+    const d = new Date(l.created_at);
+    return (now - d) < 7 * 24 * 3600 * 1000;
+  }).length;
+
+  document.getElementById('statTotal').textContent = allLeads.length;
+  document.getElementById('statHoy').textContent   = hoy;
+  document.getElementById('statSemana').textContent = semana;
+
+  if (!leads.length) {
+    document.getElementById('leadsTableBody').innerHTML =
+      '<tr><td colspan="10" style="text-align:center;color:var(--text-muted);padding:24px;">Sin leads aún</td></tr>';
+    return;
+  }
+
+  const rows = leads.map(l => {
+    const fecha = new Date(l.created_at).toLocaleString('es-AR', {
+      day:'2-digit', month:'2-digit', year:'2-digit',
+      hour:'2-digit', minute:'2-digit'
+    });
+    const ahorro = l.ahorro_mensual_ars
+      ? 'ARS ' + Math.round(l.ahorro_mensual_ars).toLocaleString('es-AR')
+      : '—';
+    const amort  = l.amortizacion_anos ? l.amortizacion_anos + ' años' : '—';
+    const kwh    = l.kwh_bimestral ? l.kwh_bimestral + ' kWh' : '—';
+    const wsp    = `https://wa.me/54${l.celular?.replace(/\D/g,'')}?text=${encodeURIComponent(`Hola ${l.nombre}! Te contactamos desde Ecoenergy por tu consulta sobre paneles solares 🌞`)}`;
+    return `<tr>
+      <td style="font-size:12px;color:var(--text-muted)">${fecha}</td>
+      <td><strong>${l.nombre || '—'}</strong></td>
+      <td style="font-family:'Space Mono',monospace">${l.celular || '—'}</td>
+      <td>${l.sistema || '—'}</td>
+      <td>${l.paneles ? l.paneles + ' pan.' : '—'}</td>
+      <td>${l.bateria || '—'}</td>
+      <td style="font-family:'Space Mono',monospace">${kwh}</td>
+      <td style="color:var(--green);font-weight:700">${ahorro}</td>
+      <td>${amort}</td>
+      <td><a class="wsp-btn" href="${wsp}" target="_blank">💬 WhatsApp</a></td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('leadsTableBody').innerHTML = rows;
+}
+
+// Exponer admin con URL ?admin
+if (window.location.search.includes('admin') || window.location.hash === '#admin') {
+  window.addEventListener('load', () => {
+    document.getElementById('adminTrigger').style.display = 'block';
+  });
+}
+
+// ── SUPABASE CONFIG ──
+(async function fetchDolar() {
+  const input = document.getElementById('dolarRate');
+  const label = document.querySelector('.dolar-live-label');
+  try {
+    const res = await fetch('https://dolarapi.com/v1/dolares/oficial');
+    if (!res.ok) throw new Error('API error');
+    const data = await res.json();
+    const venta = Math.round(data.venta);
+    if (venta && venta > 0) {
+      state.dolar = venta;
+      input.value = venta;
+      if (label) {
+        label.textContent = '✓ Actualizado hoy · dolarapi.com';
+        label.style.color = 'var(--green)';
+      }
+      updateResults();
+    }
+  } catch(e) {
+    if (label) {
+      label.textContent = '⚠ Sin conexión · usando valor por defecto';
+      label.style.color = '#FF6B35';
+    }
+  }
+})();
+
+// ── INITIAL ──
+updateResults();
+</script>
+</body>
+</html>
