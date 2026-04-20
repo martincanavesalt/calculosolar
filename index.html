@@ -757,6 +757,7 @@
         <div class="bill-sub">Valor actual del dólar BNA</div>
         <input type="number" id="dolarRate" value="1385" min="100" max="99999" step="1">
         <span class="input-unit">ARS por USD</span>
+        <div class="dolar-live-label" style="font-size:10px;margin-top:5px;color:var(--text-dim);font-style:italic;">Consultando dolarapi.com...</div>
       </div>
 
     </div>
@@ -1299,6 +1300,32 @@ document.querySelectorAll('input[type="number"]').forEach(inp => {
     updateResults();
   });
 });
+
+// ── DÓLAR BNA AUTO ──
+(async function fetchDolar() {
+  const input = document.getElementById('dolarRate');
+  const label = document.querySelector('.dolar-live-label');
+  try {
+    const res = await fetch('https://dolarapi.com/v1/dolares/oficial');
+    if (!res.ok) throw new Error('API error');
+    const data = await res.json();
+    const venta = Math.round(data.venta);
+    if (venta && venta > 0) {
+      state.dolar = venta;
+      input.value = venta;
+      if (label) {
+        label.textContent = '✓ Actualizado hoy · dolarapi.com';
+        label.style.color = 'var(--green)';
+      }
+      updateResults();
+    }
+  } catch(e) {
+    if (label) {
+      label.textContent = '⚠ Sin conexión · usando valor por defecto';
+      label.style.color = '#FF6B35';
+    }
+  }
+})();
 
 // ── INITIAL ──
 updateResults();
