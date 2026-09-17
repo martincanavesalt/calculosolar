@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Presupuestador Interno – Ecoenergy</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --g: #5DC133; --gl: #84D957; --gd: rgba(93,193,51,0.12);
+  --bg: #0C0C0C; --s: #141814; --c: #1A201A;
+  --b: rgba(93,193,51,0.22); --bs: rgba(255,255,255,0.06);
+  --t: #F0F0F0; --tm: #888; --td: #444;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--t); font-family:'Barlow',sans-serif; min-height:100vh; }
+
+/* HEADER */
+.hdr { padding:20px 32px; display:flex; align-items:center; justify-content:space-between;
+  border-bottom:1px solid var(--bs); background:var(--c); }
+.hdr-logo { display:flex; align-items:center; gap:14px; }
+.hdr-logo img { height:44px; }
+.hdr-title { font-family:'Barlow Condensed',sans-serif; font-size:13px; letter-spacing:3px;
+  text-transform:uppercase; color:var(--g); font-weight:700; }
+.hdr-sub { font-size:10px; color:var(--tm); letter-spacing:2px; text-transform:uppercase; }
+.hdr-badge { background:var(--gd); border:1px solid var(--b); border-radius:20px;
+  padding:5px 14px; font-size:10px; color:var(--gl); letter-spacing:2px; font-weight:600;
+  text-transform:uppercase; }
+
+/* LAYOUT */
+.wrap { display:grid; grid-template-columns:380px 1fr; min-height:calc(100vh - 70px); }
+
+/* FORM PANEL */
+.form-panel { background:var(--c); border-right:1px solid var(--bs); padding:28px 24px;
+  overflow-y:auto; max-height:calc(100vh - 70px); position:sticky; top:70px; }
+
+.fpanel-title { font-family:'Barlow Condensed',sans-serif; font-size:20px; font-weight:800;
+  text-transform:uppercase; letter-spacing:2px; color:var(--g); margin-bottom:20px;
+  padding-bottom:10px; border-bottom:1px solid var(--bs); }
+
+.field { margin-bottom:14px; }
+.label { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--tm);
+  font-weight:600; margin-bottom:5px; display:block; }
+.inp { width:100%; background:var(--s); border:1.5px solid var(--bs); border-radius:7px;
+  padding:9px 12px; color:var(--t); font-family:'Barlow',sans-serif; font-size:14px;
+  outline:none; transition:border-color .2s; }
+.inp:focus { border-color:var(--g); }
+select.inp { cursor:pointer; }
+input[type="number"].inp::-webkit-outer-spin-button,
+input[type="number"].inp::-webkit-inner-spin-button { -webkit-appearance:none; }
+input[type="number"].inp { -moz-appearance:textfield; }
+
+.divider { border:none; border-top:1px solid var(--bs); margin:18px 0; }
+
+.row2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+
+/* Slider */
+.slider-wrap { display:flex; gap:12px; align-items:center; }
+input[type="range"] { -webkit-appearance:none; flex:1; height:4px; background:var(--bs);
+  border-radius:2px; outline:none; cursor:pointer; }
+input[type="range"]::-webkit-slider-thumb { -webkit-appearance:none; width:18px; height:18px;
+  background:var(--g); border-radius:50%; border:2px solid #111; }
+.slider-val { font-family:'Space Mono',monospace; font-size:18px; color:var(--g);
+  font-weight:700; min-width:36px; text-align:right; }
+.slider-hint { font-size:10px; color:var(--td); margin-top:4px; }
+
+/* Optional toggle */
+.opt-toggle { display:flex; align-items:center; gap:8px; margin-bottom:10px; cursor:pointer; }
+.opt-toggle input[type="checkbox"] { accent-color:var(--g); width:14px; height:14px; cursor:pointer; }
+.opt-toggle span { font-size:11px; color:var(--tm); letter-spacing:1px; }
+
+/* Generate button */
+.gen-btn { width:100%; background:var(--g); color:#000; border:none; border-radius:9px;
+  padding:14px; font-family:'Barlow Condensed',sans-serif; font-size:20px; font-weight:800;
+  letter-spacing:2px; text-transform:uppercase; cursor:pointer; margin-top:20px;
+  transition:all .2s; box-shadow:0 0 20px rgba(93,193,51,.25); display:flex;
+  align-items:center; justify-content:center; gap:8px; }
+.gen-btn:hover { filter:brightness(1.1); transform:scale(1.02); }
+.gen-btn:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+
+/* PREVIEW PANEL */
+.preview-panel { padding:28px; overflow-y:auto; max-height:calc(100vh - 70px); background:var(--bg); }
+.preview-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+.preview-title { font-family:'Barlow Condensed',sans-serif; font-size:18px; font-weight:800;
+  text-transform:uppercase; letter-spacing:2px; color:var(--tm); }
+.download-btn { background:var(--g); color:#000; border:none; border-radius:8px;
+  padding:10px 24px; font-family:'Barlow Condensed',sans-serif; font-size:16px; font-weight:800;
+  letter-spacing:2px; text-transform:uppercase; cursor:pointer; transition:all .2s;
+  display:flex; align-items:center; gap:8px; }
+.download-btn:hover { filter:brightness(1.1); }
+.download-btn:disabled { opacity:.4; cursor:not-allowed; }
+
+/* PDF PREVIEW CONTAINER */
+#pdfPreview { background:white; border-radius:10px; overflow:hidden;
+  box-shadow:0 8px 40px rgba(0,0,0,.5); max-width:794px; margin:0 auto; }
+
+/* ══════════════════════════════════════
+   PDF CONTENT STYLES (white background)
+   ══════════════════════════════════════ */
+#pdfContent {
+  background:#fff; width:794px; font-family:'Barlow',sans-serif; color:#1a1a1a;
+  font-size:13px; line-height:1.5;
+}
+
+.pdf-header {
+  background:#1A201A; padding:28px 36px 24px; display:flex;
+  justify-content:space-between; align-items:flex-start;
+}
+.pdf-logo-area { display:flex; align-items:center; gap:16px; }
+.pdf-logo-area img { height:56px; }
+.pdf-brand { font-family:'Barlow Condensed',sans-serif; font-size:28px; font-weight:900;
+  color:#5DC133; letter-spacing:2px; text-transform:uppercase; line-height:1; }
+.pdf-brand-sub { font-size:10px; color:#888; letter-spacing:3px; text-transform:uppercase; margin-top:2px; }
+.pdf-header-right { text-align:right; }
+.pdf-presupuesto-label { font-family:'Barlow Condensed',sans-serif; font-size:42px; font-weight:900;
+  color:white; line-height:1; letter-spacing:-1px; }
+.pdf-date { font-size:11px; color:#888; margin-top:4px; letter-spacing:1px; }
+
+/* Orange/green stripe */
+.pdf-stripe { height:6px; background:linear-gradient(90deg, #5DC133, #84D957, #5DC133); }
+
+/* Client section */
+.pdf-section { padding:20px 36px; border-bottom:1px solid #eee; }
+.pdf-section-title { font-family:'Barlow Condensed',sans-serif; font-size:12px; font-weight:700;
+  text-transform:uppercase; letter-spacing:3px; color:#5DC133; margin-bottom:10px; }
+.pdf-client-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.pdf-client-item label { font-size:10px; text-transform:uppercase; letter-spacing:1px;
+  color:#888; display:block; margin-bottom:2px; }
+.pdf-client-item .val { font-size:14px; font-weight:600; color:#1a1a1a; }
+
+/* System config table */
+.pdf-table { width:100%; border-collapse:collapse; margin-top:6px; }
+.pdf-table th { background:#1A201A; color:#5DC133; padding:8px 12px; text-align:left;
+  font-size:10px; letter-spacing:2px; text-transform:uppercase; font-weight:600; }
+.pdf-table td { padding:8px 12px; border-bottom:1px solid #f0f0f0; font-size:13px; color:#333; }
+.pdf-table tr:last-child td { border-bottom:none; }
+.pdf-table tr:nth-child(even) td { background:#f9f9f9; }
+.pdf-table .green { color:#2E7D32; font-weight:700; }
+.pdf-table .bold { font-weight:700; color:#1a1a1a; }
+
+/* Big numbers */
+.pdf-metrics { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:4px 0; }
+.pdf-metric { background:#f5f5f5; border-radius:8px; padding:14px; text-align:center;
+  border-top:3px solid #5DC133; }
+.pdf-metric .m-val { font-family:'Space Mono',monospace; font-size:22px; font-weight:700;
+  color:#2E7D32; line-height:1; }
+.pdf-metric .m-label { font-size:9px; text-transform:uppercase; letter-spacing:2px;
+  color:#888; margin-top:4px; }
+
+.pdf-metric.highlight { background:#E8F5E9; }
+.pdf-metric.orange { border-top-color:#FF8800; }
+.pdf-metric.orange .m-val { color:#E65100; }
+
+/* Coverage bar */
+.pdf-cov-bar-bg { height:10px; background:#eee; border-radius:5px; overflow:hidden; margin:8px 0 4px; }
+.pdf-cov-bar-fill { height:100%; background:linear-gradient(90deg,#5DC133,#84D957); border-radius:5px; }
+
+/* Projection table */
+.pdf-proj-grid { display:grid; grid-template-columns:repeat(10,1fr); gap:4px; margin-top:6px; }
+.pdf-proj-cell { background:#f5f5f5; border-radius:4px; padding:8px 4px; text-align:center; }
+.pdf-proj-cell.paid { background:#E8F5E9; }
+.pdf-proj-cell.payback { background:#2E7D32; color:white; }
+.pdf-proj-cell .py { font-size:9px; text-transform:uppercase; color:#888; letter-spacing:1px; }
+.pdf-proj-cell.payback .py { color:rgba(255,255,255,.7); }
+.pdf-proj-cell .pv { font-size:10px; font-weight:700; color:#333; margin-top:2px; }
+.pdf-proj-cell.paid .pv { color:#2E7D32; }
+.pdf-proj-cell.payback .pv { color:white; }
+
+/* Footer */
+.pdf-footer { background:#1A201A; padding:16px 36px; display:flex;
+  justify-content:space-between; align-items:center; }
+.pdf-footer-left { font-size:11px; color:#888; }
+.pdf-footer-left strong { color:#5DC133; }
+.pdf-footer-note { font-size:10px; color:#555; text-align:right; font-style:italic; }
+
+/* Quote box */
+.pdf-callout { background:#E8F5E9; border-left:4px solid #5DC133; border-radius:4px;
+  padding:12px 16px; margin:6px 0; }
+.pdf-callout .c-title { font-size:11px; font-weight:700; color:#2E7D32; text-transform:uppercase;
+  letter-spacing:1px; margin-bottom:3px; }
+.pdf-callout .c-text { font-size:12px; color:#333; }
+
+@media print { body { background:white; } .form-panel, .preview-header { display:none; } }
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-logo">
+    <img src="data:image/png;base64,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" id="logoImg" style="height:44px;">
+    <div>
+      <div class="hdr-title">Ecoenergy</div>
+      <div class="hdr-sub">Presupuestador Interno</div>
+    </div>
+  </div>
+  <div class="hdr-badge">Solo para uso comercial</div>
+</div>
+
+<div class="wrap">
+
+  <!-- ── FORM ── -->
+  <div class="form-panel">
+    <div class="fpanel-title">📋 Nuevo Presupuesto</div>
+
+    <!-- CLIENTE -->
+    <div class="field">
+      <label class="label">Nombre del cliente *</label>
+      <input class="inp" id="fNombre" type="text" placeholder="Ej: Juan García">
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label class="label">Celular</label>
+        <input class="inp" id="fCelular" type="tel" placeholder="341 500-0000">
+      </div>
+      <div class="field">
+        <label class="label">Localidad</label>
+        <input class="inp" id="fLocalidad" type="text" placeholder="Rosario">
+      </div>
+    </div>
+    <div class="field">
+      <label class="label">Dirección</label>
+      <input class="inp" id="fDireccion" type="text" placeholder="Calle y número (opcional)">
+    </div>
+
+    <hr class="divider">
+
+    <!-- CONSUMO -->
+    <div class="field">
+      <div class="opt-toggle">
+        <input type="checkbox" id="toggleConsumo" onchange="toggleConsumoFields()">
+        <span>Ingresar consumo real de la factura</span>
+      </div>
+    </div>
+    <div id="consumoFields" style="display:none;">
+      <div class="row2">
+        <div class="field">
+          <label class="label">kWh bimestrales</label>
+          <input class="inp" id="fKwh" type="number" placeholder="480" min="0" max="9999">
+        </div>
+        <div class="field">
+          <label class="label">Total factura (ARS)</label>
+          <input class="inp" id="fArs" type="number" placeholder="135549" min="0" max="9999999">
+        </div>
+      </div>
+    </div>
+    <div id="consumoDefault" style="background:var(--s);border:1px solid var(--bs);border-radius:7px;padding:10px 12px;margin-bottom:12px;">
+      <div style="font-size:10px;color:var(--tm);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">Valores por defecto (factura EPE ref.)</div>
+      <div style="font-family:'Space Mono',monospace;font-size:13px;color:var(--g);">500 kWh/bim · $282/kWh · ~$70.500/mes</div>
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label class="label">Cotización USD (BNA)</label>
+        <input class="inp" id="fDolar" type="number" value="1385" min="100">
+      </div>
+      <div class="field">
+        <label class="label">Horas en casa / día</label>
+        <input class="inp" id="fHoras" type="number" value="8" min="1" max="12">
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- EQUIPO -->
+    <div class="field">
+      <label class="label">Inversor</label>
+      <select class="inp" id="fInverter" onchange="toggleOngridFields()">
+        <option value="4.5kw">4.5 kW – 4500W nominal (24V)</option>
+        <option value="6.2kw" selected>6.2 kW – Onda pura (48V)</option>
+        <option value="8.2kw">8.2 kW – Onda pura (48V)</option>
+        <option value="10.2kw">10.2 kW – Onda pura (48V) MPPT 160A</option>
+        <option value="2kw-ongrid">2 kW On-Grid – sin inyección a red</option>
+      </select>
+    </div>
+    <div class="field" id="fPanelesWrap">
+      <label class="label">Paneles monocristalinos 450W</label>
+      <select class="inp" id="fPaneles">
+        <option value="4">4 paneles – 1.8 kWp</option>
+        <option value="8" selected>8 paneles – 3.6 kWp</option>
+        <option value="10">10 paneles – 4.5 kWp</option>
+        <option value="14">14 paneles – 6.3 kWp</option>
+      </select>
+    </div>
+    <div class="field" id="fBateriaWrap">
+      <label class="label">Batería</label>
+      <select class="inp" id="fBateria">
+        <option value="gel">Gel 100Ah – Plomo-gel</option>
+        <option value="litio" selected>Litio 100Ah – Blunery 51.2V</option>
+        <option value="sinbat">Sin batería (solo generación diurna)</option>
+      </select>
+    </div>
+    <div class="field" id="fOngridNote" style="display:none;">
+      <div style="font-size:11px;color:var(--tm);background:var(--s);border:1px solid var(--bs);
+        border-radius:7px;padding:9px 12px;line-height:1.5;">
+        Paquete fijo: 4 paneles monocristalinos 580W (2,32 kWp), sin batería, sin inyección/devolución
+        de excedentes a la red. Precio: <strong style="color:var(--g);">USD 2.650</strong>.
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- NOTAS -->
+    <div class="field">
+      <label class="label">Observaciones (opcional)</label>
+      <textarea class="inp" id="fNotas" rows="3" style="resize:vertical;font-family:'Barlow',sans-serif;"
+        placeholder="Condiciones especiales, etapas de instalación, etc."></textarea>
+    </div>
+
+    <button class="gen-btn" onclick="generarPresupuesto()">
+      ⚡ Generar Presupuesto
+    </button>
+  </div>
+
+  <!-- ── PREVIEW ── -->
+  <div class="preview-panel">
+    <div class="preview-header">
+      <div class="preview-title">Vista previa del presupuesto</div>
+      <button class="download-btn" id="downloadBtn" onclick="descargarPDF()" disabled>
+        ⬇ Descargar PDF
+      </button>
+    </div>
+
+    <div id="pdfPreview" style="display:none;">
+      <div id="pdfContent">
+        <!-- Generado por JS -->
+      </div>
+    </div>
+
+    <div id="emptyState" style="text-align:center;padding:80px 40px;color:var(--td);">
+      <div style="font-size:64px;margin-bottom:16px;">📄</div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;
+        text-transform:uppercase;letter-spacing:2px;color:var(--tm);margin-bottom:8px;">
+        Completá el formulario
+      </div>
+      <div style="font-size:14px;color:var(--td);">
+        La vista previa del presupuesto aparecerá acá
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── HSP MENSUAL ROSARIO (E-Cologica / Ecoenergy) ──
+const HSP_MONTHLY = [6.29,5.75,5.43,4.56,4.08,2.79,3.25,4.03,4.68,5.55,5.64,6.20];
+const MESES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+const DIAS_MES = [31,28,31,30,31,30,31,31,30,31,30,31];
+
+function buildGenChart(panels, panelWatt) {
+  const pWatt = panelWatt || 450;
+  const W = 340, H = 180, padL = 44, padB = 28, padT = 10, padR = 8;
+  const chartW = W - padL - padR;
+  const chartH = H - padT - padB;
+  const barW = Math.floor(chartW / 12) - 3;
+
+  // monthly kWh
+  const vals = HSP_MONTHLY.map((hsp, i) => Math.round(panels * pWatt * hsp * DIAS_MES[i] / 1000));
+  const maxV = Math.max(...vals);
+  const yStep = Math.ceil(maxV / 4 / 50) * 50;
+  const yMax = yStep * 4;
+
+  let bars = '', labels = '', ylines = '', yTicks = '';
+
+  // Y grid lines
+  for (let i = 0; i <= 4; i++) {
+    const yv = i * yStep;
+    const y = padT + chartH - (yv / yMax) * chartH;
+    ylines += `<line x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}" stroke="#eee" stroke-width="1"/>`;
+    yTicks += `<text x="${padL - 4}" y="${y + 4}" text-anchor="end" font-size="8" fill="#999">${yv}</text>`;
+  }
+
+  vals.forEach((v, i) => {
+    const barH = (v / yMax) * chartH;
+    const x = padL + i * (chartW / 12) + 2;
+    const y = padT + chartH - barH;
+    const isMin = i === 5; // Junio = mínimo
+    const isMax = i === 0; // Enero = máximo
+    const fill = isMin ? '#FF8800' : '#5DC133';
+    bars += `<rect x="${x}" y="${y}" width="${barW}" height="${barH}" fill="${fill}" rx="2" opacity="0.9"/>`;
+    if (v === maxV || v === Math.min(...vals) || i === 5 || i === 0) {
+      bars += `<text x="${x + barW/2}" y="${y - 3}" text-anchor="middle" font-size="7" fill="${fill}" font-weight="bold">${v}</text>`;
+    }
+    labels += `<text x="${x + barW/2}" y="${H - 4}" text-anchor="middle" font-size="7.5" fill="#888">${MESES[i]}</text>`;
+  });
+
+  return `<svg width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg" style="display:block;">
+    <rect width="${W}" height="${H}" fill="#fafafa" rx="6"/>
+    ${ylines}${yTicks}
+    <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${padT + chartH}" stroke="#ccc" stroke-width="1"/>
+    <line x1="${padL}" y1="${padT + chartH}" x2="${W - padR}" y2="${padT + chartH}" stroke="#ccc" stroke-width="1"/>
+    ${bars}${labels}
+    <text x="${padL + chartW/2}" y="${H}" text-anchor="middle" font-size="8" fill="#aaa">Mes</text>
+  </svg>`;
+}
+
+function buildSavingsChart(r) {
+  if (!r.annualSaveArs || !r.sysUsd) {
+    return `<div style="background:#f5f5f5;border-radius:6px;height:180px;display:flex;align-items:center;justify-content:center;color:#aaa;font-size:12px;">Ingresá los datos de la factura para ver este gráfico</div>`;
+  }
+
+  const W = 340, H = 180, padL = 52, padB = 28, padT = 14, padR = 8;
+  const chartW = W - padL - padR;
+  const chartH = H - padT - padB;
+  const years = 10;
+
+  // Cumulative savings in USD per year
+  const cumUsd = [];
+  let cum = 0;
+  for (let y = 1; y <= years; y++) {
+    cum += (r.annualSaveArs * Math.pow(1.40, y - 1)) / r.sysArs * r.sysUsd;
+    cumUsd.push(Math.round(cum));
+  }
+  const maxV = Math.max(cumUsd[years - 1], r.sysUsd) * 1.08;
+  const paybackFloor = r.payback ? Math.floor(r.payback) : 99;
+
+  // Y ticks
+  const yStepRaw = maxV / 4;
+  const yStep = Math.ceil(yStepRaw / 500) * 500;
+  const yMax = yStep * 4;
+
+  let areas = '', dots = '', xLabels = '', ylines = '', yTicks = '';
+  const points = cumUsd.map((v, i) => {
+    const x = padL + (i + 1) * (chartW / years);
+    const y = padT + chartH - Math.min(v, yMax) / yMax * chartH;
+    return { x, y, v, year: i + 1 };
+  });
+
+  // Y grid
+  for (let i = 0; i <= 4; i++) {
+    const yv = i * yStep;
+    const y = padT + chartH - (yv / yMax) * chartH;
+    ylines += `<line x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}" stroke="#eee" stroke-width="1"/>`;
+    yTicks += `<text x="${padL - 4}" y="${y + 4}" text-anchor="end" font-size="7.5" fill="#999">${yv >= 1000 ? (yv/1000).toFixed(0)+'K' : yv}</text>`;
+  }
+
+  // Investment line (dashed)
+  const invY = padT + chartH - (r.sysUsd / yMax) * chartH;
+  const invLine = `<line x1="${padL}" y1="${invY}" x2="${W - padR}" y2="${invY}" stroke="#FF8800" stroke-width="1.5" stroke-dasharray="5,3"/>
+    <text x="${W - padR - 2}" y="${invY - 4}" text-anchor="end" font-size="8" fill="#FF8800" font-weight="bold">Inversión USD ${Math.round(r.sysUsd).toLocaleString('es-AR')}</text>`;
+
+  // Area fill
+  const polyPts = [`${padL},${padT + chartH}`, ...points.map(p => `${p.x},${p.y}`), `${points[points.length-1].x},${padT + chartH}`].join(' ');
+  areas = `<polygon points="${polyPts}" fill="rgba(93,193,51,0.12)"/>`;
+
+  // Line
+  const linePts = points.map(p => `${p.x},${p.y}`).join(' ');
+  areas += `<polyline points="${linePts}" fill="none" stroke="#5DC133" stroke-width="2"/>`;
+
+  // Dots and labels
+  points.forEach(p => {
+    const isPayback = p.year === paybackFloor + 1 || (r.payback && p.year === Math.ceil(r.payback));
+    const recovered = r.payback && p.year > r.payback;
+    const color = recovered || isPayback ? '#2E7D32' : '#5DC133';
+    dots += `<circle cx="${p.x}" cy="${p.y}" r="${isPayback ? 5 : 3}" fill="${color}" stroke="white" stroke-width="1.5"/>`;
+    if (isPayback) {
+      dots += `<text x="${p.x}" y="${p.y - 8}" text-anchor="middle" font-size="8" fill="#2E7D32" font-weight="bold">✓ Recupero</text>`;
+    }
+    xLabels += `<text x="${p.x}" y="${H - 4}" text-anchor="middle" font-size="7.5" fill="#888">${p.year}</text>`;
+  });
+
+  return `<svg width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg" style="display:block;">
+    <rect width="${W}" height="${H}" fill="#fafafa" rx="6"/>
+    ${ylines}${yTicks}
+    <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${padT + chartH}" stroke="#ccc" stroke-width="1"/>
+    <line x1="${padL}" y1="${padT + chartH}" x2="${W - padR}" y2="${padT + chartH}" stroke="#ccc" stroke-width="1"/>
+    ${invLine}
+    ${areas}${dots}${xLabels}
+    <text x="${padL + chartW/2}" y="${H}" text-anchor="middle" font-size="8" fill="#aaa">Año</text>
+  </svg>`;
+}
+
+// ── HELPERS ──
+const PRICING = {
+  // Costos base de inversor por modelo (sin paneles / batería / instalación)
+  inverter: { '4.5kw': 960, '6.2kw': 1080, '8.2kw': 1600, '10.2kw': 1980 },
+  panelUnit: 270,
+  gelUnit: 305,
+  litio: 1700,
+  install: 600,
+  gelCount: { '4.5kw': 2, '6.2kw': 4, '8.2kw': 4, '10.2kw': 4 },
+  // Paquete fijo: On-Grid 2kW sin inyección/devolución a la red
+  ongrid2kwFixedUsd: 2650,
+  ongrid2kwPanels: 4,
+  ongrid2kwPanelW: 580
+};
+const HSP = 4.85;
+const PANEL_W = 450;
+const ESCALACION = 40; // % anual fijo
+
+// ── DEFAULT LOGO (embebido desde local) ──
+let logoDataUrl = '';
+(function loadLogo() {
+  const img = document.getElementById('logoImg');
+  const canvas = document.createElement('canvas');
+  img.onload = () => {
+    canvas.width = img.naturalWidth;
+    canvas.height = img.naturalHeight;
+    canvas.getContext('2d').drawImage(img, 0, 0);
+    logoDataUrl = canvas.toDataURL('image/png');
+  };
+  img.onerror = () => {};
+})();
+
+function toggleConsumoFields() {
+  const checked = document.getElementById('toggleConsumo').checked;
+  document.getElementById('consumoFields').style.display = checked ? 'block' : 'none';
+  document.getElementById('consumoDefault').style.display = checked ? 'none' : 'block';
+}
+
+function toggleOngridFields() {
+  const isOngrid2kw = document.getElementById('fInverter').value === '2kw-ongrid';
+  document.getElementById('fPanelesWrap').style.display = isOngrid2kw ? 'none' : 'block';
+  document.getElementById('fBateriaWrap').style.display = isOngrid2kw ? 'none' : 'block';
+  document.getElementById('fOngridNote').style.display = isOngrid2kw ? 'block' : 'none';
+}
+
+function calcSistema(inv, panels, bat, kwh_bim, ars_bim, dolar, horas, panelWatt) {
+  const pWatt = panelWatt || PANEL_W;
+  const monthlykWh = kwh_bim / 2;
+  const monthlyArs = ars_bim / 2;
+
+  // Generación
+  const dailyGen = panels * pWatt * HSP;
+  const monthlyGen = dailyGen * 30 / 1000;
+
+  // Cobertura
+  const directEff = 0.55 + (horas / 12) * 0.30;
+  let batUsable = 0;
+  let batLabel = '';
+  let batCount = '';
+  if (bat === 'sinbat') {
+    batUsable = 0; batLabel = 'Sin batería'; batCount = '—';
+  } else if (bat === 'litio' && inv !== '3kw') {
+    batUsable = 4.8; batLabel = '1× Litio Blunery 51.2V-100Ah'; batCount = '1 unidad';
+  } else {
+    const n = PRICING.gelCount[inv];
+    const v = inv === '3kw' ? 24 : 48;
+    batUsable = Math.round(v * 100 / 1000 * 0.7 * 10) / 10;
+    batLabel = `${n}× Gel 100Ah (${v}V)`; batCount = `${n} unidades`;
+  }
+
+  const batMonthly = batUsable * 26;
+  const totalUsable = monthlyGen * directEff + batMonthly;
+  const coverage = Math.min(1, totalUsable / monthlykWh);
+
+  const monthlySaveArs = monthlyArs * coverage;
+  const annualSaveArs = monthlySaveArs * 12;
+
+  // Costo sistema
+  let sysUsd;
+  if (inv === '2kw-ongrid') {
+    // Paquete fijo cotizado (4 paneles 580W + inversor on-grid 2kW + instalación)
+    sysUsd = PRICING.ongrid2kwFixedUsd;
+  } else {
+    const invCost = PRICING.inverter[inv];
+    const panelCost = panels * PRICING.panelUnit;
+    let batCost = 0;
+    if (bat === 'sinbat') batCost = 0;
+    else if (bat === 'litio' && inv !== '3kw') batCost = PRICING.litio;
+    else batCost = PRICING.gelCount[inv] * PRICING.gelUnit;
+    sysUsd = invCost + panelCost + batCost + PRICING.install;
+  }
+  const sysArs = sysUsd * dolar;
+
+  // Payback con escalación 40% anual
+  let payback = null;
+  let cum = 0;
+  for (let y = 1; y <= 25; y++) {
+    const prev = cum;
+    cum += annualSaveArs * Math.pow(1.40, y - 1);
+    if (cum >= sysArs) {
+      payback = Math.round(((y - 1) + (sysArs - prev) / (annualSaveArs * Math.pow(1.40, y - 1))) * 10) / 10;
+      break;
+    }
+  }
+
+  // Proyección 10 años
+  const proj = [];
+  let cumUsd = 0;
+  for (let y = 1; y <= 10; y++) {
+    cumUsd += (annualSaveArs * Math.pow(1.40, y - 1)) / dolar;
+    proj.push({ year: y, cumUsd: Math.round(cumUsd), yearSave: Math.round(annualSaveArs * Math.pow(1.40, y-1)) });
+  }
+
+  return {
+    dailyGen: Math.round(dailyGen / 1000 * 10) / 10,
+    monthlyGen: Math.round(monthlyGen),
+    monthlykWh: Math.round(monthlykWh),
+    coverage: Math.round(coverage * 100),
+    monthlySaveArs: Math.round(monthlySaveArs),
+    annualSaveArs: Math.round(annualSaveArs),
+    monthlySaveUsd: Math.round(monthlySaveArs / dolar),
+    sysUsd, sysArs: Math.round(sysArs),
+    payback, proj,
+    batUsable, batLabel, batCount,
+    tarifa: Math.round(ars_bim / kwh_bim),
+    ratePerKwh: Math.round(ars_bim / kwh_bim)
+  };
+}
+
+function fmt(n) { return n.toLocaleString('es-AR'); }
+function today() {
+  const d = new Date();
+  return d.toLocaleDateString('es-AR', { day:'2-digit', month:'long', year:'numeric' });
+}
+
+function generarPresupuesto() {
+  const nombre = document.getElementById('fNombre').value.trim();
+  if (!nombre) { alert('Ingresá el nombre del cliente.'); return; }
+
+  const tieneConsumo = document.getElementById('toggleConsumo').checked;
+  const kwh_bim = tieneConsumo ? (parseFloat(document.getElementById('fKwh').value) || 500) : 500;
+  const ars_bim = tieneConsumo ? (parseFloat(document.getElementById('fArs').value) || kwh_bim * 282) : 500 * 282;
+  const dolar = parseFloat(document.getElementById('fDolar').value) || 1385;
+  const horas = parseInt(document.getElementById('fHoras').value) || 8;
+  const inv = document.getElementById('fInverter').value;
+  const isOngrid2kw = inv === '2kw-ongrid';
+  const panels = isOngrid2kw ? PRICING.ongrid2kwPanels : parseInt(document.getElementById('fPaneles').value);
+  const bat = isOngrid2kw ? 'sinbat' : document.getElementById('fBateria').value;
+  const panelWatt = isOngrid2kw ? PRICING.ongrid2kwPanelW : PANEL_W;
+
+  const cel = document.getElementById('fCelular').value.trim();
+  const loc = document.getElementById('fLocalidad').value.trim();
+  const dir = document.getElementById('fDireccion').value.trim();
+  const notas = document.getElementById('fNotas').value.trim();
+
+  const r = calcSistema(inv, panels, bat, kwh_bim, ars_bim, dolar, horas, panelWatt);
+
+  const invLabels = {
+    '4.5kw': 'Inversor cargador 4.5kW – Onda pura 24V',
+    '6.2kw': 'Inversor cargador 6.2kW – Onda pura 48V',
+    '8.2kw': 'Inversor cargador 8.2kW – Onda pura 48V',
+    '10.2kw': 'Inversor cargador 10.2kW MPPT 160A – Onda pura 48V',
+    '2kw-ongrid': 'Inversor On-Grid 2kW – sin inyección a red'
+  };
+  const invNombre = invLabels[inv];
+
+  const paybackFloor = r.payback ? Math.floor(r.payback) : 99;
+
+  const logoSrc = logoDataUrl || 'data:image/png;base64,iVBORw0KGgo=';
+
+  const html = `
+  <div class="pdf-header">
+    <div class="pdf-logo-area">
+      <img src="${logoSrc}" style="height:52px;" onerror="this.style.display='none'">
+      <div>
+        <div class="pdf-brand">Ecoenergy</div>
+        <div class="pdf-brand-sub">Sistemas Solares · Santa Fe</div>
+        <div style="font-size:10px;color:#5DC133;margin-top:4px;letter-spacing:1px;">341 585-8527 · @ecoenergy.arg</div>
+      </div>
+    </div>
+    <div class="pdf-header-right">
+      <div class="pdf-presupuesto-label">Presupuesto</div>
+      <div class="pdf-date">${today()}</div>
+      <div style="font-size:10px;color:#5DC133;margin-top:6px;letter-spacing:1px;">Válido por 7 días · Dólar BNA</div>
+    </div>
+  </div>
+  <div class="pdf-stripe"></div>
+
+  <!-- DATOS DEL CLIENTE -->
+  <div class="pdf-section">
+    <div class="pdf-section-title">Datos del cliente</div>
+    <div class="pdf-client-grid">
+      <div class="pdf-client-item"><label>Cliente</label><div class="val">${nombre}</div></div>
+      <div class="pdf-client-item"><label>Celular</label><div class="val">${cel || '—'}</div></div>
+      <div class="pdf-client-item"><label>Localidad</label><div class="val">${loc || '—'}</div></div>
+      <div class="pdf-client-item"><label>Dirección</label><div class="val">${dir || '—'}</div></div>
+    </div>
+  </div>
+
+  <!-- CONSUMO -->
+  <div class="pdf-section">
+    <div class="pdf-section-title">Consumo eléctrico actual</div>
+    <table class="pdf-table">
+      <tr><td style="width:50%;color:#555;">Consumo bimestral</td><td class="bold">${fmt(kwh_bim)} kWh</td></tr>
+      <tr><td style="color:#555;">Consumo mensual promedio</td><td class="bold">${fmt(r.monthlykWh)} kWh/mes</td></tr>
+      <tr><td style="color:#555;">Costo bimestral factura</td><td class="bold">ARS ${fmt(Math.round(ars_bim))}</td></tr>
+      <tr><td style="color:#555;">Tarifa efectiva (con impuestos)</td><td class="bold">ARS ${fmt(r.tarifa)}/kWh</td></tr>
+    </table>
+  </div>
+
+  <!-- SISTEMA PROPUESTO -->
+  <div class="pdf-section">
+    <div class="pdf-section-title">Sistema solar propuesto</div>
+    <table class="pdf-table">
+      <tr><th>Componente</th><th>Detalle</th><th>Cantidad</th></tr>
+      <tr><td>${isOngrid2kw ? 'Inversor' : 'Inversor cargador'}</td><td>${invNombre}</td><td>1 unidad</td></tr>
+      <tr><td>Paneles solares</td><td>Monocristalino ${panelWatt}W Half-Cell 144 celdas</td><td>${panels} unidades</td></tr>
+      ${isOngrid2kw ? '' : `<tr><td>Batería</td><td>${r.batLabel}</td><td>${r.batCount}</td></tr>`}
+      <tr><td>Estructura soporte</td><td>Aluminio galvanizado + escuadras completas</td><td>Incluida</td></tr>
+      <tr><td>Tablero de seguridad</td><td>${isOngrid2kw ? 'Protecciones AC/DC para sistema on-grid' : 'Para híbrido MPS5K–MPS5.5K + protecciones'}</td><td>1 unidad</td></tr>
+      ${inv === '10.2kw' ? '<tr><td>Accesorios</td><td>Wifi plug para monitoreo remoto del inversor</td><td>1 unidad</td></tr>' : ''}
+      <tr><td>Instalación en domicilio</td><td>Mano de obra + materiales + puesta en marcha</td><td>Incluida</td></tr>
+      ${isOngrid2kw ? '<tr><td colspan="3" style="font-size:11px;color:#888;font-style:italic;">Sistema On-Grid: aporta a la red del consumo diurno del hogar. Sin batería y sin inyección/devolución de excedentes a la red.</td></tr>' : ''}
+    </table>
+  </div>
+
+  <!-- GENERACIÓN Y COBERTURA -->
+  <div class="pdf-section">
+    <div class="pdf-section-title">Generación y cobertura estimada</div>
+    <div class="pdf-metrics">
+      <div class="pdf-metric highlight">
+        <div class="m-val">${r.monthlyGen}</div>
+        <div class="m-label">kWh generados / mes</div>
+      </div>
+      <div class="pdf-metric">
+        <div class="m-val">${r.dailyGen}</div>
+        <div class="m-label">kWh generados / día</div>
+      </div>
+      <div class="pdf-metric highlight">
+        <div class="m-val">${r.coverage}%</div>
+        <div class="m-label">Cobertura del consumo</div>
+      </div>
+    </div>
+    <div style="margin-top:10px;">
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">
+        <span>Cobertura estimada</span><span>${r.coverage}%</span>
+      </div>
+      <div class="pdf-cov-bar-bg"><div class="pdf-cov-bar-fill" style="width:${r.coverage}%"></div></div>
+      <div style="font-size:10px;color:#888;font-style:italic;">
+        * Basado en HSP promedio 4.85 h/día región Rosario/Santa Fe · ${horas} horas/día en domicilio
+      </div>
+    </div>
+  </div>
+
+  <!-- AHORRO Y AMORTIZACIÓN -->
+  <div class="pdf-section">
+    <div class="pdf-section-title">Ahorro estimado y amortización</div>
+    <div class="pdf-metrics">
+      <div class="pdf-metric highlight">
+        <div class="m-val">ARS ${(r.monthlySaveArs/1000).toFixed(0)}K</div>
+        <div class="m-label">Ahorro mensual año 1</div>
+      </div>
+      <div class="pdf-metric highlight">
+        <div class="m-val">ARS ${(r.annualSaveArs/1000).toFixed(0)}K</div>
+        <div class="m-label">Ahorro anual año 1</div>
+      </div>
+      <div class="pdf-metric orange">
+        <div class="m-val">${r.payback ? r.payback + ' años' : 'N/D'}</div>
+        <div class="m-label">Amortización (+40%/año)</div>
+      </div>
+    </div>
+
+    <div style="margin-top:12px;">
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#888;margin-bottom:6px;">
+        Proyección de ahorros anuales (con +40% de incremento tarifario anual)
+      </div>
+      <div class="pdf-proj-grid">
+        ${r.proj.map(p => {
+          const cls = p.year === paybackFloor + 1 ? 'payback' : p.year <= paybackFloor ? 'paid' : '';
+          return `<div class="pdf-proj-cell ${cls}">
+            <div class="py">Año ${p.year}</div>
+            <div class="pv">${(p.yearSave/1000).toFixed(0)}K</div>
+          </div>`;
+        }).join('')}
+      </div>
+      <div style="font-size:10px;color:#888;font-style:italic;margin-top:6px;">
+        Verde = año amortizado · Resaltado = año de recupero de inversión
+      </div>
+    </div>
+  </div>
+
+  <!-- PRECIO -->
+  <div class="pdf-section" style="background:#1A201A;">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+      <div>
+        <div style="font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#5DC133;margin-bottom:6px;font-weight:700;">Inversión total del sistema</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:48px;font-weight:900;color:white;line-height:1;">
+          USD ${fmt(r.sysUsd)}
+        </div>
+        <div style="font-size:14px;color:#888;margin-top:4px;font-family:'Space Mono',monospace;">
+          ARS ${fmt(r.sysArs)} · Dólar BNA
+        </div>
+        ${(inv === '10.2kw' && bat === 'litio') ? `<div style="font-size:11px;color:#5DC133;margin-top:6px;">Existe la posibilidad de funcionar sin batería (descontar USD 1.800)</div>` : ''}
+      </div>
+      <div style="text-align:right;">
+        <div style="background:#5DC133;color:#000;border-radius:8px;padding:12px 20px;margin-bottom:8px;">
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:2px;font-weight:700;margin-bottom:2px;">Modo de pago</div>
+          <div style="font-size:13px;font-weight:600;">80% al confirmar</div>
+          <div style="font-size:13px;font-weight:600;">20% al finalizar instalación</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  ${notas ? `<div class="pdf-section">
+    <div class="pdf-section-title">Observaciones</div>
+    <div style="font-size:13px;color:#444;line-height:1.6;">${notas}</div>
+  </div>` : ''}
+
+  <!-- CALLOUT -->
+  <div class="pdf-section">
+    <div class="pdf-callout">
+      <div class="c-title">☀ ¿Por qué instalar solar ahora?</div>
+      <div class="c-text">La tarifa eléctrica acumuló +300–500% entre 2023 y 2025. Con un incremento anual estimado del 40%, la inversión en energía solar se recupera en promedio entre 3 y 5 años — y los paneles duran 25 años. Es la mejor protección contra la suba de tarifas.</div>
+    </div>
+  </div>
+
+  <!-- GRÁFICOS -->
+  <div class="pdf-section">
+    <div class="pdf-section-title">Generación estimada y retorno de inversión</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:4px;">
+
+      <!-- GRÁFICO 1: Generación mensual -->
+      <div>
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#888;margin-bottom:8px;font-weight:600;">
+          Generación mensual estimada (kWh)
+        </div>
+        ${buildGenChart(panels, panelWatt)}
+        <div style="font-size:9px;color:#aaa;font-style:italic;margin-top:4px;text-align:center;">
+          HSP promedio anual 4.85 h/día · Rosario/Santa Fe
+        </div>
+      </div>
+
+      <!-- GRÁFICO 2: Ahorro acumulado vs inversión -->
+      <div>
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#888;margin-bottom:8px;font-weight:600;">
+          Ahorro acumulado vs inversión (USD)
+        </div>
+        ${buildSavingsChart(r)}
+        <div style="font-size:9px;color:#aaa;font-style:italic;margin-top:4px;text-align:center;">
+          Con +40% de incremento tarifario anual · Verde = recupero
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="pdf-stripe"></div>
+  <div class="pdf-footer">
+    <div class="pdf-footer-left">
+      <strong>Ecoenergy</strong> · Energía Solar Fotovoltaica<br>
+      📱 341 585-8527 · Martín Cánaves · @ecoenergy.arg
+    </div>
+    <div class="pdf-footer-note">
+      Precios en dólar BNA vigente al ${today()}<br>
+      Presupuesto orientativo · Sujeto a verificación en sitio
+    </div>
+  </div>
+  `;
+
+  document.getElementById('pdfContent').innerHTML = html;
+  document.getElementById('pdfPreview').style.display = 'block';
+  document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('downloadBtn').disabled = false;
+  document.getElementById('downloadBtn').dataset.nombre = nombre;
+
+  // Scroll to preview
+  document.querySelector('.preview-panel').scrollTop = 0;
+}
+
+async function descargarPDF() {
+  const btn = document.getElementById('downloadBtn');
+  const nombre = btn.dataset.nombre || 'cliente';
+  btn.disabled = true;
+  btn.textContent = '⏳ Generando...';
+
+  const element = document.getElementById('pdfContent');
+  const opt = {
+    margin: 0,
+    filename: `Presupuesto_Ecoenergy_${nombre.replace(/\s+/g,'_')}.pdf`,
+    image: { type: 'jpeg', quality: 0.96 },
+    html2canvas: { scale: 2, useCORS: true, logging: false, width: 794 },
+    jsPDF: { unit: 'px', format: [794, element.scrollHeight + 2], orientation: 'portrait' }
+  };
+
+  try {
+    await html2pdf().set(opt).from(element).save();
+  } catch(e) {
+    console.error(e);
+    alert('Error al generar el PDF. Intentá de nuevo.');
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '⬇ Descargar PDF';
+}
+
+// Auto-fetch dólar BNA
+(async function() {
+  try {
+    const res = await fetch('https://dolarapi.com/v1/dolares/oficial');
+    const d = await res.json();
+    if (d.venta) document.getElementById('fDolar').value = Math.round(d.venta);
+  } catch(e) {}
+})();
+</script>
+</body>
+</html>
