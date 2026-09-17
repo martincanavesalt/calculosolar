@@ -266,7 +266,7 @@ input[type="range"]::-webkit-slider-thumb { -webkit-appearance:none; width:18px;
     <div class="field">
       <label class="label">Inversor</label>
       <select class="inp" id="fInverter" onchange="toggleOngridFields()">
-        <option value="3kw">3 kW – 2400W nominal (24V)</option>
+        <option value="4.5kw">4.5 kW – 4500W nominal (24V)</option>
         <option value="6.2kw" selected>6.2 kW – Onda pura (48V)</option>
         <option value="8.2kw">8.2 kW – Onda pura (48V)</option>
         <option value="10.2kw">10.2 kW – Onda pura (48V) MPPT 160A</option>
@@ -472,12 +472,12 @@ function buildSavingsChart(r) {
 // ── HELPERS ──
 const PRICING = {
   // Costos base de inversor por modelo (sin paneles / batería / instalación)
-  inverter: { '3kw': 960, '6.2kw': 1080, '8.2kw': 1600, '10.2kw': 1980 },
+  inverter: { '4.5kw': 960, '6.2kw': 1080, '8.2kw': 1600, '10.2kw': 1980 },
   panelUnit: 270,
   gelUnit: 305,
   litio: 1700,
-  install: 600,
-  gelCount: { '3kw': 2, '6.2kw': 4, '8.2kw': 4, '10.2kw': 4 },
+  install: 900,
+  gelCount: { '4.5kw': 2, '6.2kw': 4, '8.2kw': 4, '10.2kw': 4 },
   // Paquete fijo: On-Grid 2kW sin inyección/devolución a la red
   ongrid2kwFixedUsd: 2650,
   ongrid2kwPanels: 4,
@@ -627,7 +627,7 @@ function generarPresupuesto() {
   const r = calcSistema(inv, panels, bat, kwh_bim, ars_bim, dolar, horas, panelWatt);
 
   const invLabels = {
-    '3kw': 'Inversor cargador 3kW – Onda pura 24V',
+    '4.5kw': 'Inversor cargador 4.5kW – Onda pura 24V',
     '6.2kw': 'Inversor cargador 6.2kW – Onda pura 48V',
     '8.2kw': 'Inversor cargador 8.2kW – Onda pura 48V',
     '10.2kw': 'Inversor cargador 10.2kW MPPT 160A – Onda pura 48V',
